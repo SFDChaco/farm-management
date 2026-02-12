@@ -6,6 +6,15 @@ import { Search, Plus, X, Upload, ChevronLeft, ChevronRight } from 'lucide-react
 const ANIMAL_TYPES = ['Rind','Kuh','Kalb','Stier','Schaf','Pferd','Ziege','Schwein','Esel','Maultier'];
 const PER_PAGE = 50;
 
+function clean(obj) {
+  const out = {};
+  for (const [k, v] of Object.entries(obj)) {
+    if (v === '' || v === undefined) out[k] = null;
+    else out[k] = v;
+  }
+  return out;
+}
+
 export function AnimalsPage({ farmId }) {
   const [animals, setAnimals] = useState([]);
   const [total, setTotal] = useState(0);
@@ -16,6 +25,7 @@ export function AnimalsPage({ farmId }) {
   const [showModal, setShowModal] = useState(false);
   const [editAnimal, setEditAnimal] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [saveError, setSaveError] = useState('');
   const [form, setForm] = useState({
     rfid: '', ear_tag: '', name: '', animal_type: 'Rind', breed: '', sex: 'w',
     born: '', weight_kg: '', status: 'gesund', purchase_cost: '', is_mast: false, notes: ''
@@ -26,25 +36,27 @@ export function AnimalsPage({ farmId }) {
     let query = supabase.from('animals').select('*', { count: 'exact' }).eq('farm_id', farmId);
     if (search) query = query.or(`name.ilike.%${search}%,rfid.ilike.%${search}%,ear_tag.ilike.%${search}%`);
     if (typeFilter !== 'all') query = query.eq('animal_type', typeFilter);
-    query = query.order('name').range(page * PER_PAGE, (page + 1) * PER_PAGE - 1);
+    query = query.order('created_at', { ascending: false }).range(page * PER_PAGE, (page + 1) * PER_PAGE - 1);
     const { data, count } = await query;
     setAnimals(data || []);
     setTotal(count || 0);
     setLoading(false);
   }, [farmId, search, typeFilter, page]);
 
-  useEffect(() => { loadAnimals(); }, [loadAnimals]);
+  useEffect(() => { if (farmId) loadAnimals(); }, [loadAnimals, farmId]);
 
   const openNew = () => {
     setEditAnimal(null);
+    setSaveError('');
     setForm({ rfid: '', ear_tag: '', name: '', animal_type: 'Rind', breed: '', sex: 'w', born: '', weight_kg: '', status: 'gesund', purchase_cost: '', is_mast: false, notes: '' });
     setShowModal(true);
   };
 
   const openEdit = (a) => {
     setEditAnimal(a);
+    setSaveError('');
     setForm({
-      rfid: a.rfid || '', ear_tag: a.ear_tag || '', name: a.name || '', animal_type: a.animal_type,
+      rfid: a.rfid || '', ear_tag: a.ear_tag || '', name: a.name || '', animal_type: a.animal_type || 'Rind',
       breed: a.breed || '', sex: a.sex || 'w', born: a.born || '', weight_kg: a.weight_kg || '',
       status: a.status || 'gesund', purchase_cost: a.purchase_cost || '', is_mast: a.is_mast || false, notes: a.notes || ''
     });
@@ -52,17 +64,35 @@ export function AnimalsPage({ farmId }) {
   };
 
   const save = async () => {
-    const payload = {
-      ...form,
+    setSaveError('');
+    const payload = clean({
+      name: form.name || 'Unbenannt',
+      rfid: form.rfid,
+      ear_tag: form.ear_tag,
+      animal_type: form.animal_type || 'Rind',
+      breed: form.breed,
+      sex: form.sex || 'w',
+      born: form.born || null,
+      weight_kg: form.weight_kg ? parseFloat(form.weight_kg) : null,
+      status: form.status || 'gesund',
+      purchase_cost: form.purchase_cost ? parseFloat(form.purchase_cost) : 0,
+      is_mast: form.is_mast || false,
+      notes: form.notes,
       farm_id: farmId,
-      weight_kg: parseFloat(form.weight_kg) || null,
-      purchase_cost: parseFloat(form.purchase_cost) || 0,
-    };
+    });
+
+    let result;
     if (editAnimal) {
-      await supabase.from('animals').update(payload).eq('id', editAnimal.id);
+      result = await supabase.from('animals').update(payload).eq('id', editAnimal.id);
     } else {
-      await supabase.from('animals').insert(payload);
+      result = await supabase.from('animals').insert(payload);
     }
+
+    if (result.error) {
+      setSaveError(result.error.message);
+      return;
+    }
+
     setShowModal(false);
     loadAnimals();
   };
@@ -155,7 +185,7 @@ export function AnimalsPage({ farmId }) {
         </table>
         {totalPages > 1 && (
           <div className="flex items-center justify-between px-4 py-3 border-t border-farm-border">
-            <span className="text-xs text-gray-500">Seite {page + 1} von {totalPages}</span>
+            <span className="text-xs text-gray-500">Seite {page + 1} von {totalPages} - {total} Tiere</span>
             <div className="flex gap-2">
               <button disabled={page === 0} onClick={() => setPage(p => p - 1)}
                 className="p-1.5 rounded border border-farm-border hover:bg-farm-border disabled:opacity-30 transition">
@@ -176,6 +206,11 @@ export function AnimalsPage({ farmId }) {
               <h2 className="font-display text-lg font-bold">{editAnimal ? 'Tier bearbeiten' : 'Neues Tier'}</h2>
               <button onClick={() => setShowModal(false)} className="text-gray-500 hover:text-white"><X size={20} /></button>
             </div>
+            {saveError && (
+              <div className="mb-4 p-3 rounded-lg bg-red-900/30 border border-red-800 text-farm-red text-sm">
+                Fehler: {saveError}
+              </div>
+            )}
             {editAnimal && (
               <div className="mb-4">
                 <label className="block text-xs text-gray-400 mb-2">Foto</label>
