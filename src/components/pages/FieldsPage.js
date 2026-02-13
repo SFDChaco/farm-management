@@ -32,14 +32,11 @@ async function parseKMZ(file) {
   const bytes = new Uint8Array(arrayBuffer);
   let kmlText;
   if (bytes[0] === 0x50 && bytes[1] === 0x4B) {
-    const text = new TextDecoder('utf-8', { fatal: false }).decode(arrayBuffer);
-    const kmlStart = text.indexOf('<?xml');
-    const kmlTag = text.indexOf('<kml');
-    const start = kmlStart !== -1 ? kmlStart : kmlTag;
-    if (start === -1) throw new Error('Kein KML in KMZ gefunden');
-    kmlText = text.substring(start);
-    const kmlEnd = kmlText.indexOf('</kml>');
-    if (kmlEnd !== -1) kmlText = kmlText.substring(0, kmlEnd + 6);
+    const JSZip = (await import('jszip')).default;
+    const zip = await JSZip.loadAsync(arrayBuffer);
+    const kmlFile = Object.keys(zip.files).find(n => n.endsWith('.kml'));
+    if (!kmlFile) throw new Error('Kein KML in KMZ gefunden');
+    kmlText = await zip.files[kmlFile].async('string');
   } else {
     kmlText = new TextDecoder().decode(arrayBuffer);
   }
