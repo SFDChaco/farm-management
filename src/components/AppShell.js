@@ -10,21 +10,23 @@ import {
 import { DashboardPage } from '@/components/pages/DashboardPage';
 import { AnimalsPage } from '@/components/pages/AnimalsPage';
 import { FieldsPage } from '@/components/pages/FieldsPage';
+import { EquipmentPage } from '@/components/pages/EquipmentPage';
+import { HerdsPage } from '@/components/pages/HerdsPage';
 
 const NAV = [
-  { id: 'dashboard', label: 'Übersicht', icon: BarChart3 },
+  { id: 'dashboard', label: 'Uebersicht', icon: BarChart3 },
   { id: 'animals', label: 'Viehbestand', icon: Tag },
   { id: 'herds', label: 'Herden', icon: Users },
+  { id: 'fields', label: 'Felder', icon: Sprout },
+  { id: 'fuel', label: 'Maschinen', icon: Truck },
   { id: 'scale', label: 'Waage', icon: Activity },
   { id: 'mast', label: 'Mast', icon: TrendingUp },
   { id: 'treatment', label: 'Behandlung', icon: Wrench },
   { id: 'breeding', label: 'Zucht', icon: Baby },
   { id: 'control', label: 'Kontrolle', icon: AlertTriangle },
   { id: 'feed', label: 'Futter', icon: Package },
-  { id: 'fuel', label: 'Geräte', icon: Truck },
   { id: 'water', label: 'Wasser', icon: Droplets },
   { id: 'plan', label: 'Planung', icon: TrendingUp },
-  { id: 'fields', label: 'Felder', icon: Sprout },
   { id: 'whatsapp', label: 'WhatsApp', icon: MessageCircle },
   { id: 'finances', label: 'Finanzen', icon: DollarSign },
 ];
@@ -105,7 +107,7 @@ export function AppShell({ session, profile }) {
               className="w-full px-4 py-3 rounded-xl bg-farm-bg border border-farm-border text-white outline-none focus:border-farm-green" />
           </div>
           <div>
-            <label className="block text-xs text-gray-400 mb-1">Fläche (Hektar)</label>
+            <label className="block text-xs text-gray-400 mb-1">Flaeche (Hektar)</label>
             <input type="number" value={setupForm.area} onChange={e => setSetupForm({...setupForm, area: e.target.value})}
               placeholder="z.B. 5000"
               className="w-full px-4 py-3 rounded-xl bg-farm-bg border border-farm-border text-white outline-none focus:border-farm-green" />
@@ -124,13 +126,15 @@ export function AppShell({ session, profile }) {
     switch (page) {
       case 'dashboard': return <DashboardPage farmId={currentFarm.id} farm={currentFarm} />;
       case 'animals': return <AnimalsPage farmId={currentFarm.id} />;
-  case 'fields': return <FieldsPage farmId={currentFarm.id} />;
+      case 'fields': return <FieldsPage farmId={currentFarm.id} />;
+      case 'fuel': return <EquipmentPage farmId={currentFarm.id} />;
+      case 'herds': return <HerdsPage farmId={currentFarm.id} />;
       default: return (
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <div className="text-4xl mb-4">🚧</div>
             <h2 className="font-display text-xl font-bold mb-2">{NAV.find(n => n.id === page)?.label}</h2>
-            <p className="text-sm text-gray-500">Wird in der nächsten Sitzung eingebaut.</p>
+            <p className="text-sm text-gray-500">Wird in der naechsten Sitzung eingebaut.</p>
           </div>
         </div>
       );
@@ -152,7 +156,7 @@ export function AppShell({ session, profile }) {
         <div className="px-3 py-2 border-b border-farm-border">
           <button onClick={() => setShowFarmSelector(!showFarmSelector)}
             className="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-farm-bg border border-farm-border text-sm hover:border-farm-green transition">
-            <span className="truncate font-medium">{currentFarm?.name || 'Farm wählen'}</span>
+            <span className="truncate font-medium">{currentFarm?.name || 'Farm waehlen'}</span>
             <ChevronDown size={14} className="text-gray-500" />
           </button>
           {showFarmSelector && (
@@ -192,7 +196,7 @@ export function AppShell({ session, profile }) {
           })}
         </nav>
         <div className="p-3 border-t border-farm-border text-[10px] text-gray-600 text-center">
-          FarmOS v2.0 · {farms.length} Farm{farms.length !== 1 ? 's' : ''}
+          FarmOS v2.1 · {farms.length} Farm{farms.length !== 1 ? 's' : ''}
         </div>
       </aside>
       <main className="flex-1 ml-56 p-6 overflow-y-auto min-h-screen">
