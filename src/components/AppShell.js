@@ -9,6 +9,7 @@ import {
 
 import { DashboardPage } from '@/components/pages/DashboardPage';
 import { AnimalsPage } from '@/components/pages/AnimalsPage';
+import { FieldsPage } from '@/components/pages/FieldsPage';
 
 const NAV = [
   { id: 'dashboard', label: 'Übersicht', icon: BarChart3 },
@@ -123,6 +124,7 @@ export function AppShell({ session, profile }) {
     switch (page) {
       case 'dashboard': return <DashboardPage farmId={currentFarm.id} farm={currentFarm} />;
       case 'animals': return <AnimalsPage farmId={currentFarm.id} />;
+  case 'fields': return <FieldsPage farmId={currentFarm.id} />;
       default: return (
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
