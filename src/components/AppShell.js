@@ -12,6 +12,9 @@ import { AnimalsPage } from '@/components/pages/AnimalsPage';
 import { FieldsPage } from '@/components/pages/FieldsPage';
 import { EquipmentPage } from '@/components/pages/EquipmentPage';
 import { HerdsPage } from '@/components/pages/HerdsPage';
+import { HealthPage } from '@/components/pages/HealthPage';
+import { WeightPage } from '@/components/pages/WeightPage';
+import { SalesPage } from '@/components/pages/SalesPage';
 
 const NAV = [
   { id: 'dashboard', label: 'Uebersicht', icon: BarChart3 },
@@ -20,15 +23,14 @@ const NAV = [
   { id: 'fields', label: 'Felder', icon: Sprout },
   { id: 'fuel', label: 'Maschinen', icon: Truck },
   { id: 'scale', label: 'Waage', icon: Activity },
-  { id: 'mast', label: 'Mast', icon: TrendingUp },
-  { id: 'treatment', label: 'Behandlung', icon: Wrench },
+  { id: 'treatment', label: 'Gesundheit', icon: Wrench },
   { id: 'breeding', label: 'Zucht', icon: Baby },
   { id: 'control', label: 'Kontrolle', icon: AlertTriangle },
   { id: 'feed', label: 'Futter', icon: Package },
   { id: 'water', label: 'Wasser', icon: Droplets },
   { id: 'plan', label: 'Planung', icon: TrendingUp },
   { id: 'whatsapp', label: 'WhatsApp', icon: MessageCircle },
-  { id: 'finances', label: 'Finanzen', icon: DollarSign },
+  { id: 'finances', label: 'Verkauf', icon: DollarSign },
 ];
 
 export function AppShell({ session, profile }) {
@@ -129,6 +131,9 @@ export function AppShell({ session, profile }) {
       case 'fields': return <FieldsPage farmId={currentFarm.id} />;
       case 'fuel': return <EquipmentPage farmId={currentFarm.id} />;
       case 'herds': return <HerdsPage farmId={currentFarm.id} />;
+      case 'treatment': return <HealthPage farmId={currentFarm.id} />;
+      case 'scale': return <WeightPage farmId={currentFarm.id} />;
+      case 'finances': return <SalesPage farmId={currentFarm.id} />;
       default: return (
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
